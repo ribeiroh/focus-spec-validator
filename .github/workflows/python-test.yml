@@ -1,0 +1,50 @@
+name: Python Test
+
+on:
+  [ push ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r dev_requirements.txt
+
+      - name: Run tests with pytest
+        run: |
+          pytest --cov=focus focus/ --cov-report=xml
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+      - name: Generate coverage badge
+        run: |
+          pip install coverage-badge
+          coverage-badge -f -o coverage.svg
+
+      - name: Create passing badge
+        run: |
+          echo -n "passing" > passing.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: badges
+          path: |
+            coverage.svg
+            passing.txt
