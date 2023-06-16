@@ -99,10 +99,8 @@ class SpecRules:
             for name in files:
                 yield os.path.join(root, name)
 
-    def validate(self, focus_data):
-        pandera_schema, checklist = Rule.generate_schema(
-            rules=self.rules, override_config=self.override_config
-        )
+    @staticmethod
+    def __validate_schema__(pandera_schema, checklist, focus_data):
         try:
             pandera_schema.validate(focus_data, lazy=True)
             failure_cases = None
@@ -114,3 +112,11 @@ class SpecRules:
         )
         validation_result.process_result()
         return validation_result
+
+    def validate(self, focus_data):
+        pandera_schema, checklist = Rule.generate_schema(
+            rules=self.rules, override_config=self.override_config
+        )
+        return self.__validate_schema__(
+            pandera_schema=pandera_schema, checklist=checklist, focus_data=focus_data
+        )
